@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  RETAILER
+  DISPATCHER
+  RIDER
+}
+
+enum RiderAvailability {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+enum DeliveryStatus {
+  PENDING
+  ASSIGNED
+  PICKED_UP
+  DELIVERED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  storeId      String?
+  store        Store?   @relation(fields: [storeId], references: [id])
+  rider        Rider?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  deliveriesCreated Delivery[]   @relation("CreatedBy")
+  auditEvents       AuditEvent[]
+}
+
+model Store {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  deliveries Delivery[]
+}
+
+model Rider {
+  id                 String            @id @default(uuid())
+  userId             String            @unique
+  user               User              @relation(fields: [userId], references: [id])
+  phone              String
+  availabilityStatus RiderAvailability @default(AVAILABLE)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  deliveries Delivery[]
+}
+
+model Delivery {
+  id               String         @id @default(uuid())
+  reference        String         @unique
+  storeId          String
+  store            Store          @relation(fields: [storeId], references: [id])
+  createdById      String
+  createdBy        User           @relation("CreatedBy", fields: [createdById], references: [id])
+  riderId          String?
+  rider            Rider?         @relation(fields: [riderId], references: [id])
+  customerName     String
+  customerPhone    String
+  deliveryAddress  String
+  description      String
+  status           DeliveryStatus @default(PENDING)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  assignedAt       DateTime?
+  pickedUpAt       DateTime?
+  deliveredAt      DateTime?
+
+  auditEvents AuditEvent[]
+}
+
+model AuditEvent {
+  id             String   @id @default(uuid())
+  deliveryId     String
+  delivery       Delivery @relation(fields: [deliveryId], references: [id])
+  actorId        String
+  actor          User     @relation(fields: [actorId], references: [id])
+  action         String
+  previousStatus String?
+  newStatus      String?
+  createdAt      DateTime @default(now())
+  metadata       Json?
+}
