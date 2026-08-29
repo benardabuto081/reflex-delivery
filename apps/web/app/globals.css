@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ink: #1B2A3D;
+  --color-paper: #F5F4F0;
+  --color-card: #FFFFFF;
+  --color-border: #D8D3C7;
+  --color-amber: #E8A33D;
+  --color-green: #3A8F63;
+  --color-slate: #6B7A8F;
+  --color-danger: #C0463C;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ink: var(--color-ink);
+  --color-paper: var(--color-paper);
+  --color-card: var(--color-card);
+  --color-border: var(--color-border);
+  --color-amber: var(--color-amber);
+  --color-green: var(--color-green);
+  --color-slate: var(--color-slate);
+  --color-danger: var(--color-danger);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+}
+
+/* Waybill stub: dashed perforated card for each delivery */
+.waybill {
+  position: relative;
+}
+.waybill::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--color-paper);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  border: 1px dashed var(--color-border);
 }
