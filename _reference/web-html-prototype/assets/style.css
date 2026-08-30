@@ -1,0 +1,189 @@
+/* apps/web/assets/style.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+:root {
+  --ink: #1B2A3D;
+  --paper: #F5F4F0;
+  --card: #FFFFFF;
+  --border: #D8D3C7;
+  --amber: #E8A33D;
+  --green: #3A8F63;
+  --slate: #6B7A8F;
+  --danger: #C0463C;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  margin: 0;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ---------- Login page ---------- */
+
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.wordmark {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.wordmark span { color: var(--amber); }
+
+.login-sub {
+  font-size: 14px;
+  color: var(--slate);
+  margin-bottom: 28px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+input:focus, textarea:focus {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+button {
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px;
+  width: 100%;
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+.btn-primary:hover { background: #2A3E58; }
+
+.form-error {
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: 12px;
+  min-height: 18px;
+}
+
+/* ---------- Dashboard (used next step) ---------- */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.topbar-store { font-size: 15px; color: var(--slate); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.dashboard-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* Waybill stub: dashed perforated card for each delivery */
+.waybill {
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.waybill::before {
+  content: "";
+  position: absolute;
+  left: -6px; top: 50%;
+  width: 12px; height: 12px;
+  background: var(--paper);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  border: 1px dashed var(--border);
+}
+
+.waybill-ref {
+  font-size: 12px;
+  color: var(--slate);
+  letter-spacing: 0.5px;
+}
+
+.status-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-PENDING { background: #FCEED3; color: #8A5A0E; }
+.status-ASSIGNED { background: #E4E9F0; color: var(--slate); }
+.status-PICKED_UP { background: #E4E9F0; color: var(--slate); }
+.status-DELIVERED { background: #DFF0E6; color: var(--green); }
