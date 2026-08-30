@@ -2,19 +2,23 @@ import {
   Body,
   Controller,
   Get,
-  NotFoundException,
   Param,
   Post,
+  UseGuards,
+  BadRequestException,
 } from "@nestjs/common";
 import { DeliveriesService } from "./deliveries.service";
 import { InvalidTransitionError } from "./delivery-state-machine";
-import { BadRequestException } from "@nestjs/common";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard, Roles } from "../auth/guards/roles.guard";
 
 @Controller("deliveries")
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class DeliveriesController {
   constructor(private readonly deliveriesService: DeliveriesService) {}
 
   @Post()
+  @Roles("RETAILER")
   create(
     @Body()
     body: {
@@ -45,6 +49,7 @@ export class DeliveriesController {
   }
 
   @Post(":id/assign")
+  @Roles("DISPATCHER")
   async assign(
     @Param("id") id: string,
     @Body() body: { riderId: string; actorId: string },
@@ -60,6 +65,7 @@ export class DeliveriesController {
   }
 
   @Post(":id/pickup")
+  @Roles("RIDER")
   async pickup(@Param("id") id: string, @Body() body: { actorId: string }) {
     try {
       return await this.deliveriesService.pickup(id, body.actorId);
@@ -72,6 +78,7 @@ export class DeliveriesController {
   }
 
   @Post(":id/deliver")
+  @Roles("RIDER")
   async deliver(@Param("id") id: string, @Body() body: { actorId: string }) {
     try {
       return await this.deliveriesService.deliver(id, body.actorId);
