@@ -1,14 +1,14 @@
-# Reflex — Architecture
+ï»¿# Reflex â€” Architecture
 
 ## Tech Stack and Modular Monolith
 
 Reflex is built as a modular monolith. This means the backend runs as
 a single program, internally organized into separate, well-defined
-modules — each with its own responsibility (for example, PrismaModule
+modules â€” each with its own responsibility (for example, PrismaModule
 for database access, DeliveriesModule for delivery logic). We chose
 this over a microservices architecture because microservices would
 require deploying and managing multiple separately-running services,
-service discovery, and handling network failures between them —
+service discovery, and handling network failures between them â€”
 overhead a five-person beginner team couldn't justify in a one-week
 sprint. A modular monolith gives the benefit of clean separation
 between concerns without that infrastructure cost.
@@ -16,29 +16,29 @@ between concerns without that infrastructure cost.
 Stack: Next.js (frontend), NestJS (backend), Prisma (ORM), PostgreSQL
 (database).
 
-## Data Model — 5 Entities
+## Data Model â€” 5 Entities
 
-1. **User** — has a `role` field (`RETAILER`, `DISPATCHER`, or `RIDER`)
+1. **User** â€” has a `role` field (`RETAILER`, `DISPATCHER`, or `RIDER`)
    that controls what actions a person is allowed to take in the
    system.
 
-2. **Store** — represents a retailer's shop. Two models connect to it:
+2. **Store** â€” represents a retailer's shop. Two models connect to it:
    `User` (a retailer's account is optionally tied to the store they
    work for, via `storeId`) and `Delivery` (every delivery belongs to
-   exactly one store — `storeId` is required here).
+   exactly one store â€” `storeId` is required here).
 
-3. **Rider** — a separate model from `User`, because riders need extra
+3. **Rider** â€” a separate model from `User`, because riders need extra
    fields (`phone`, `availabilityStatus`) that don't apply to
    Retailers or Dispatchers. Rider links back to User with a
    one-to-one relationship (`userId`), so only actual riders carry
    that extra data.
 
-4. **Delivery** — the core object. `riderId` is optional (`String?`)
+4. **Delivery** â€” the core object. `riderId` is optional (`String?`)
    because a PENDING delivery, by definition, has no rider assigned
-   yet — the schema mirrors the real-world lifecycle rather than
+   yet â€” the schema mirrors the real-world lifecycle rather than
    fighting it.
 
-5. **AuditEvent** — creates a permanent trail of every action taken on
+5. **AuditEvent** â€” creates a permanent trail of every action taken on
    a delivery: who did it, what changed, and when. Without it, the
    Delivery table only shows the current status; AuditEvent is what
    lets the team reconstruct full history if a dispute or question
@@ -51,7 +51,7 @@ PENDING -> ASSIGNED -> PICKED_UP -> DELIVERED.
 
 This is enforced in `delivery-state-machine.ts`, not left as a
 convention. ALLOWED_TRANSITIONS is a lookup table defining which
-status can follow each current status — PENDING can only move to
+status can follow each current status â€” PENDING can only move to
 ASSIGNED, ASSIGNED only to PICKED_UP, PICKED_UP only to DELIVERED, and
 DELIVERED cannot move anywhere (it is the final state).
 
@@ -61,7 +61,7 @@ allowed list (['PICKED_UP']), checks whether DELIVERED is in it, and
 returns false because it isn't.
 
 assertValidTransition() calls canTransition() and, if it returns
-false, throws an InvalidTransitionError — stopping the invalid change
+false, throws an InvalidTransitionError â€” stopping the invalid change
 before it ever reaches the database. The state machine is a pure
 function (no side effects), kept separate from deliveries.service.ts,
 which handles the real-world side effects: saving to the database,
@@ -84,7 +84,34 @@ error.
 
 ## Authentication
 
-Status: IN PROGRESS — not yet present in the repository as of
-30 August 2026. No auth folder exists under apps/api/src on main or
-any branch (confirmed via git fetch). This section will be completed
-once auth is merged. Followed up with Bernard directly.
+Authentication uses email/password login. POST /auth/register creates
+a new user ({ name, email, password, role, storeId? }); POST
+/auth/login ({ email, password }) returns { accessToken, user }.
+Passwords are stored as a one-way hash (via bcrypt) instead of plain
+text, so that if the database is ever breached, attackers get
+scrambled data that cannot be turned back into the real password â€”
+instead of the user's actual password, which they might reuse on
+other sites.
+
+On successful login, the server issues a JWT containing the user's
+id, email, and role. The frontend attaches this token to every
+subsequent request as Authorization: Bearer <token>. Including role
+in the JWT payload matters because the server can check permissions
+immediately, just by reading the token â€” no extra database trip
+needed for that specific check. Tokens expire after 8 hours.
+
+Two guards enforce this on every delivery endpoint. JwtAuthGuard
+applies to every route in the controller (it is on the class, not a
+specific method), so even a route with no @Roles() label still
+requires some valid, logged-in user â€” it just does not check which
+role that user has. RolesGuard then checks role-specific restrictions
+where present: POST /deliveries requires RETAILER, POST
+/deliveries/:id/assign requires DISPATCHER, POST
+/deliveries/:id/pickup and POST /deliveries/:id/deliver require
+RIDER. GET /deliveries, GET /deliveries/:id, and GET
+/deliveries/:id/events have no role restriction â€” any logged-in user
+can view them, but a valid token is still required.
+
+A request with no token returns 401 Unauthorized; a valid token with
+the wrong role returns 403 Forbidden.
+
