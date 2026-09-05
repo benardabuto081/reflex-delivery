@@ -37,7 +37,7 @@ export class UsersService {
       storeId = store.id;
     }
 
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
@@ -46,5 +46,20 @@ export class UsersService {
         storeId,
       },
     });
+
+    // Riders need a Rider record (separate from User) to be
+    // assignable to deliveries and to look up "my deliveries".
+    // Auto-create one on registration so a Rider account is never
+    // left unusable with no Rider profile.
+    if (data.role === "RIDER") {
+      await this.prisma.rider.create({
+        data: {
+          userId: user.id,
+          phone: "Not yet provided",
+        },
+      });
+    }
+
+    return user;
   }
 }

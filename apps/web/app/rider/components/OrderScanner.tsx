@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface OrderScannerProps {
+  correctReference: string;
   onScanSuccess: (scannedRef: string) => void;
   onClose: () => void;
 }
 
-export default function OrderScanner({ onScanSuccess, onClose }: OrderScannerProps) {
+export default function OrderScanner({ correctReference, onScanSuccess, onClose }: OrderScannerProps) {
   const [scanning, setScanning] = useState(true);
   const [progress, setProgress] = useState(0);
 
@@ -29,7 +30,7 @@ export default function OrderScanner({ onScanSuccess, onClose }: OrderScannerPro
     <div className="fixed inset-0 bg-slate-950/90 z-50 flex flex-col items-center justify-center p-6 font-sans">
       <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-sm font-bold text-slate-200 tracking-wide uppercase">📦 Next.js Barcode Scanner</h3>
+          <h3 className="text-sm font-bold text-slate-200 tracking-wide uppercase">Next.js Barcode Scanner</h3>
           <button onClick={onClose} className="text-xs bg-slate-800 text-slate-400 hover:text-slate-200 px-2.5 py-1 rounded-md">
             Cancel
           </button>
@@ -41,7 +42,7 @@ export default function OrderScanner({ onScanSuccess, onClose }: OrderScannerPro
           )}
           <div className="text-center p-4">
             <p className="text-xs text-emerald-400 font-mono animate-pulse">
-              {scanning ? `[ OVERLAY ACTIVE: Processing ${progress}% ]` : '[ Verification Ready ]'}
+              {scanning ? `[ OVERLAY ACTIVE: Processing ${progress}% ]` : "[ Verification Ready ]"}
             </p>
           </div>
         </div>
@@ -50,18 +51,18 @@ export default function OrderScanner({ onScanSuccess, onClose }: OrderScannerPro
           <p className="text-xs text-slate-400 font-medium">Simulate live hardware scan input event:</p>
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => onScanSuccess('RX-101')}
+              onClick={() => onScanSuccess(correctReference)}
               disabled={scanning}
               className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono p-2.5 rounded-lg border border-slate-700 disabled:opacity-40"
             >
-              Scan Tag: RX-101
+              Scan Tag: {correctReference}
             </button>
             <button
-              onClick={() => onScanSuccess('RX-104')}
+              onClick={() => onScanSuccess("RX-WRONGTAG")}
               disabled={scanning}
               className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono p-2.5 rounded-lg border border-slate-700 disabled:opacity-40"
             >
-              Scan Tag: RX-104
+              Scan Tag: RX-WRONGTAG
             </button>
           </div>
         </div>

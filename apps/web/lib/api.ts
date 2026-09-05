@@ -56,6 +56,13 @@ export async function getRiders(): Promise<Rider[]> {
   return res.json();
 }
 
+export async function getRiderProfile(): Promise<Rider | null> {
+  const session = getSession();
+  if (!session) return null;
+  const riders = await getRiders();
+  return riders.find((r) => r.userId === session.user.id) ?? null;
+}
+
 export async function assignDelivery(deliveryId: string, riderId: string): Promise<Delivery> {
   const session = getSession();
   const res = await fetch(`${API_BASE}/deliveries/${deliveryId}/assign`, {
@@ -65,6 +72,34 @@ export async function assignDelivery(deliveryId: string, riderId: string): Promi
       ...authHeaders(),
     },
     body: JSON.stringify({ riderId, actorId: session?.user.id }),
+  });
+  if (!res.ok) throw new Error("Transition rejected");
+  return res.json();
+}
+
+export async function pickupDelivery(deliveryId: string): Promise<Delivery> {
+  const session = getSession();
+  const res = await fetch(`${API_BASE}/deliveries/${deliveryId}/pickup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
+    body: JSON.stringify({ actorId: session?.user.id }),
+  });
+  if (!res.ok) throw new Error("Transition rejected");
+  return res.json();
+}
+
+export async function deliverDelivery(deliveryId: string): Promise<Delivery> {
+  const session = getSession();
+  const res = await fetch(`${API_BASE}/deliveries/${deliveryId}/deliver`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
+    body: JSON.stringify({ actorId: session?.user.id }),
   });
   if (!res.ok) throw new Error("Transition rejected");
   return res.json();
