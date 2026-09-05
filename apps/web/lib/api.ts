@@ -1,6 +1,6 @@
 import type { Session, User, Delivery } from "./types";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export async function login(email: string, password: string): Promise<Session> {
   const res = await fetch(`${API_BASE}/auth/login`, {
@@ -37,7 +37,7 @@ export async function getDeliveries(storeId: string): Promise<Delivery[]> {
   });
   if (!res.ok) throw new Error("Could not load deliveries");
   const all: Delivery[] = await res.json();
-  return all.filter((d) => d.storeId === storeId); // client-side filter until Bernard confirms createdById filtering
+  return all.filter((d) => d.storeId === storeId);
 }
 
 export async function createDelivery(payload: {
