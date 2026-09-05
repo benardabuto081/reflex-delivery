@@ -1,4 +1,4 @@
-import type { Session, User, Delivery } from "./types";
+import type { Session, User, Delivery, Rider } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -38,6 +38,36 @@ export async function getDeliveries(storeId: string): Promise<Delivery[]> {
   if (!res.ok) throw new Error("Could not load deliveries");
   const all: Delivery[] = await res.json();
   return all.filter((d) => d.storeId === storeId);
+}
+
+export async function getAllDeliveries(): Promise<Delivery[]> {
+  const res = await fetch(`${API_BASE}/deliveries`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error("Could not load deliveries");
+  return res.json();
+}
+
+export async function getRiders(): Promise<Rider[]> {
+  const res = await fetch(`${API_BASE}/riders`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error("Could not load riders");
+  return res.json();
+}
+
+export async function assignDelivery(deliveryId: string, riderId: string): Promise<Delivery> {
+  const session = getSession();
+  const res = await fetch(`${API_BASE}/deliveries/${deliveryId}/assign`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
+    body: JSON.stringify({ riderId, actorId: session?.user.id }),
+  });
+  if (!res.ok) throw new Error("Transition rejected");
+  return res.json();
 }
 
 export async function createDelivery(payload: {

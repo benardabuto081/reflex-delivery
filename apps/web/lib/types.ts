@@ -9,11 +9,19 @@ export interface User {
   storeId: string;
 }
 
+export interface Rider {
+  id: string;
+  userId: string;
+  phone: string;
+  availabilityStatus: "AVAILABLE" | "BUSY" | "OFFLINE";
+}
+
 export interface Delivery {
   id: string;
   reference: string;
   storeId: string;
   createdById: string;
+  riderId: string | null;
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
